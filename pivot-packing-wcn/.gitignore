@@ -1,0 +1,26 @@
+# Bulk 97-structure CIF cache (fetched on demand by 01_fetch_structures.py)
+# is not committed. The 13 CIFs used by VALIDATION.md ARE committed (small,
+# ~14 MB total) so the validation check is reproducible without re-fetching.
+data/cif/*.cif
+!data/cif/6UO8.cif
+!data/cif/8JH7.cif
+!data/cif/8INZ.cif
+!data/cif/11CJ.cif
+!data/cif/7DTT.cif
+!data/cif/5I6X.cif
+!data/cif/3DDL.cif
+!data/cif/5KUK.cif
+!data/cif/2AHY.cif
+!data/cif/6S4M.cif
+!data/cif/4NTJ.cif
+!data/cif/4H33.cif
+!data/cif/7SF7.cif
+
+# Full-dataset pipeline output is not committed (regenerate via
+# 02_orient_and_compute_pivot.py); the validation-set output IS committed.
+results/*.csv
+!results/validation_test_pivot_13.csv
+
+__pycache__/
+*.pyc
+.DS_Store

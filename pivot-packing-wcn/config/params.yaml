@@ -1,0 +1,66 @@
+# Parameters for pivot-depth computation.
+# These values match the manuscript's primary analysis (validated against a
+# 13-structure spot-check spanning all 9 fold families in VALIDATION.md: 12/13
+# exact matches on coordination-number packing, 11/13 on WCN; the two
+# exceptions are both understood, not open bugs -- see VALIDATION.md).
+
+# NOTE: no resnum-based fusion-insert exclusion is applied. An earlier draft
+# used a "residues numbered >=1000 are a crystallization-fusion insert"
+# heuristic; it silently truncated genuine native residues for receptors
+# whose own numbering legitimately exceeds 1000 (e.g. 7SF7/ADGRL3, an
+# adhesion GPCR with a long native N-terminal domain and no numbering gap at
+# all near 1000). Fusion partners are excluded implicitly and correctly
+# instead: they fall outside the UniProt-derived TM ranges used below, so
+# they never enter the TM-restricted depth-binning profile regardless of how
+# they are numbered. See VALIDATION.md.
+
+depth_binning:
+  bin_width_angstrom: 3.0            # width of membrane-normal depth bins
+  readout_range_angstrom: 21.0       # FIXED bin range [-21, +21] A -- NOT a
+                                      # data-driven min/max over each structure's
+                                      # own depth range. Bins with <3 contributing
+                                      # TM-flagged residues are dropped from the
+                                      # profile before the peak (pivot) is chosen.
+  central_threshold_angstrom: 6.0    # "within +/-6 A of midplane" summary threshold
+
+coordination_number_packing:
+  atom_set: "CA"                    # backbone C-alpha only
+  radius_angstrom: 10.0             # neighbor-counting radius (strict '<' cutoff)
+  # Neighbor counting pool: ALL Cα atoms of the chain (after fusion-insert
+  # exclusion), not just TM-region residues -- this ensures residues near the
+  # TM-region boundary see their real spatial neighbors. Only the depth-
+  # binning/pivot-search step afterwards is restricted to TM-flagged residues.
+
+all_atom_wcn:
+  atom_set: "heavy"                 # all non-hydrogen atoms
+  weighting: "inverse_square_distance"    # WCN_i = sum_j 1/d_ij^2 over atoms j
+  capture_radius_angstrom: 15.0     # pair-search radius (1/d^2 makes contributions
+                                     # beyond this negligible); same full-chain
+                                     # neighbor pool as coordination-number packing,
+                                     # aggregated to per-residue mean before binning
+
+membrane_normal_estimation:
+  # Four-tier procedure, applied in order of preference (see manuscript
+  # Methods, "Pivot depth estimation", and README.md for full detail):
+  #   (1) topology_verified   -- PCA normal (TM-region Cα) + UniProt EC/IC
+  #                              topological-domain sign check. Primary
+  #                              method; covers 59/97 structures.
+  #   (2) PDBTM_TMDET_verified -- PDBTM database precomputed membrane-boundary
+  #                              matrix. Covers 28/97 structures.
+  #   (3) medium_PCA_fallback -- PCA normal retained without an independent
+  #                              sign check (least reliable along with tier 4).
+  #                              Covers 7/97 structures.
+  #   (4) Nterm_cyto_fallback -- coarse sign check from known N/C-terminus
+  #                              cytoplasmic localization. Covers 3/97 structures.
+  # We do NOT use the OPM/PPM database anywhere in this pipeline; an earlier
+  # internal draft of the manuscript incorrectly described the orientation
+  # method as OPM/PPM-based -- that description has been corrected.
+  method: "topology_pca_pdbtm_fourtier"
+  min_tm_flagged_residues: 15       # below this, a structure is skipped (its
+                                     # profile would rest on too few residues)
+
+statistics:
+  bootstrap_resamples: 5000
+  bootstrap_ci: 0.95
+  multiple_comparison_correction: "bonferroni"
+  n_primary_tests: 2                # one per packing definition
