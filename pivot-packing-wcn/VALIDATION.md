@@ -104,14 +104,40 @@ this script (and the manuscript's Methods description) uses for the other
 membrane matrix; this script's tier-1 topology check independently passes
 (finds EC/IC-consistent topology annotations) and reports `topology_
 verified` instead, giving a materially different -- in this case, roughly
-sign-flipped -- normal. This is a real difference in *which tier* was used
-for this one structure in the original one-off batch addition, not a
-computational bug in either the packing/WCN math or the generic 4-tier
-logic (both validated exactly correct on the other 12 structures,
-including two other structures from that same addition batch: 4H33 and
-3DDL, both of which use PDBTM here exactly as in the manuscript). If
-reproducing 5KUK specifically, use the PDBTM tier rather than trusting
-this script's topology-verification pass for that one PDB ID.
+sign-flipped -- normal.
+
+**This is not simply a difference in which tier was used -- one of the two
+orientations is very likely wrong, and the evidence points at the
+manuscript's stored (PDBTM-tier) value.** Checking each orientation
+against 5KUK's own UniProt topological-domain annotations (the same
+EC>IC consistency check tier 1 uses): the manuscript's stored orientation
+gives a mean depth of -22.0 Å for residues annotated Extracellular (n=35)
+versus +42.4 Å for residues annotated Cytoplasmic (n=219) -- backwards,
+i.e. it fails the very topology test the primary method relies on. This
+script's independently-recomputed topology-verified orientation gives
++22.5 Å (Extracellular) versus -44.9 Å (Cytoplasmic) -- correctly
+ordered. This suggests the original pipeline's one-off manual PDBTM/PCA
+correlation-based classification made the wrong call for this one
+structure, not merely a defensible alternative choice.
+
+Despite the ~30 Å (packing) / ~24 Å magnitude of this per-structure
+discrepancy, it has negligible impact on the manuscript's reported
+statistics: those are computed on |pivot depth| (absolute distance from
+the membrane center), not signed depth, and substituting this script's
+topology-consistent values for 5KUK (packing +16.5, WCN +13.5, vs the
+manuscript's stored -13.5/-10.5) shifts the primary n=88 packing p-value
+from 0.00311 to 0.00303 and the WCN p-value from 0.00066 to 0.00061 --
+both statistically and qualitatively unchanged, with every reported
+within-±6Å percentage identical. This is a real, worth-flagging
+discrepancy in one stored value, not a computational bug in the
+packing/WCN math or the generic 4-tier logic (both validated exactly
+correct on the other 12 structures, including two other structures from
+that same one-off addition batch: 4H33 and 3DDL, both of which use PDBTM
+here exactly as in the manuscript, and both correctly). The manuscript's
+published Supplementary Table S1 value for 5KUK has NOT been changed as
+part of this validation exercise -- that would require a separate,
+deliberate decision (e.g., an erratum) rather than a silent correction
+inside a reproduction script.
 
 **4NTJ, WCN only.** The packing pivot matches exactly. The WCN profile has
 two nearly-tied local maxima (7.56 vs 7.12 at adjacent depth bins, ~6%
